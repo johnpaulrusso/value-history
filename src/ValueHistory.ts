@@ -1,2 +1,3 @@
 export {GetHistory} from "./GetHistory"
-export {NO_HISTORIC_CHANGES, ValueHistoryTypeMismatchError} from "./Types"
+export {AccumulateHistory} from "./AccumulateHistory"
+export {NO_HISTORIC_CHANGES} from "./Types"

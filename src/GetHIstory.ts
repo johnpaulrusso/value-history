@@ -1,5 +1,3 @@
-//------ GetHistory ------//
-
 import {ValueHistoryTypeMismatchError, NO_HISTORIC_CHANGES, type ICompressedArrayHistory, type ICompressedObjectHistory} from "./Types";
 
 export function GetHistory(originalValue: any, finalValue: any) : any 
@@ -172,4 +170,3 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
 
     return result;
 }
-//------ GetHistory ------//
