@@ -111,4 +111,8 @@ describe('Accumulate History (w/ Primitives)', () => {
       expect(() => {valuehistory.AccumulateHistory({newKeys: [], changes: [{key: "v1", history: 1}]}, {length: 4, changes: [{index: 3, history: 2}]})})
         .toThrow("Incompatible Histories - older is an object history and newer is not.");
     });
+    it('should throw an error if original value is an unrecognized history type.', () => {
+        expect(() => {valuehistory.AccumulateHistory({v1: 1, v2: 2}, {v1: 1, v2: 2})})
+          .toThrow("Incompatible Histories - Unrecognized history types.");
+      });
   });
