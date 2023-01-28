@@ -2,10 +2,11 @@
   "name": "value-history",
   "version": "1.0.0",
   "description": "Value history calculations and restorations",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/ValueHistory.js",
+  "types": "lib/ValueHistory.d.ts",
   "scripts": {
     "test": "jest --config jestconfig.json",
+    "test_coverage": "jest --config jestconfig.json --coverage",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
