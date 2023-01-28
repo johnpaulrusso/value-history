@@ -5,7 +5,7 @@
   "main": "lib/ValueHistory.js",
   "types": "lib/ValueHistory.d.ts",
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "jest --config jestconfig.json --verbose",
     "test_coverage": "jest --config jestconfig.json --coverage",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
