@@ -1,6 +1,6 @@
 {
   "name": "value-history",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Value history calculations and restorations",
   "main": "lib/ValueHistory.js",
   "types": "lib/ValueHistory.d.ts",
