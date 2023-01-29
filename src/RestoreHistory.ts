@@ -29,7 +29,18 @@ export function RestoreHistory(valueRestorationWrapper: ValueRestorationWrapper,
                 }
                 else
                 {
-                    throw new ValueHistoryTypeMismatchError("Final value is an array and history is not.");
+                    throw new ValueHistoryTypeMismatchError("Value is an array and history is not.");
+                }
+            }
+            else
+            {
+                if(history.hasOwnProperty("newKeys"))
+                {
+                    RestoreObjectHistory(valueRestorationWrapper, history as ICompressedObjectHistory);
+                }
+                else
+                {
+                    throw new ValueHistoryTypeMismatchError("Value is an object and history is not.");
                 }
             }
         }   
@@ -38,7 +49,7 @@ export function RestoreHistory(valueRestorationWrapper: ValueRestorationWrapper,
             //primitive
             if(history === Object(history))
             {
-                throw new ValueHistoryTypeMismatchError("Final value is a primitive and history is not.");
+                throw new ValueHistoryTypeMismatchError("Value is a primitive and history is not.");
             }
             else
             {
@@ -83,4 +94,25 @@ function RestoreArrayHistory(arrayWrapper: ValueRestorationWrapper, history: ICo
     }
 
     arrayWrapper.valueToRestore = array;
+}
+
+function RestoreObjectHistory(objectWrapper: ValueRestorationWrapper, history: ICompressedObjectHistory) 
+{
+    let obj = objectWrapper.valueToRestore as Object;
+
+    //Delete any keys that are new to the value.
+    history.newKeys.forEach(newKey => {
+        if(obj.hasOwnProperty(newKey))
+        {
+            delete obj[newKey as keyof typeof obj];
+        }
+    });
+    
+    history.changes.forEach(change => {
+        let objWrapper = new ValueRestorationWrapper(obj[change.key as keyof typeof obj]);
+        RestoreHistory(objWrapper, change.history);
+        obj[change.key as keyof typeof obj] = objWrapper.valueToRestore;
+    });
+
+    objectWrapper.valueToRestore = obj;
 }
