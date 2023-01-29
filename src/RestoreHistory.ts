@@ -1,31 +1,33 @@
 import {ValueHistoryTypeMismatchError, NO_HISTORIC_CHANGES, type ICompressedArrayHistory, type ICompressedObjectHistory} from "./Types";
 
-export class ValueRestorationWrapper
-{
-    valueToRestore: any
-    constructor(valueToRestore: any)
-    {
-        this.valueToRestore = valueToRestore;
-    }
-}
-
 /**
  * RestoreHistory restores a "final" value to its "original" value using a history record.
  * A wrapper object must be used so that primitives are not lost via pass-by-value.
  * @param valueRestorationWrapper 
  * @param history 
+ * @returns original value.
  */
-export function RestoreHistory(valueRestorationWrapper: ValueRestorationWrapper, history: any) 
+export function RestoreHistory(value: any, history: any) : any
 {
+    //By default, the result is a clone of the value (history === NO_HSTORIC_CHANGES).
+    //Cloning is necessary so that the method doesn't mutate the given value.
+    let valueClone = structuredClone(value);
+    return RestoreHistoryInternal(valueClone, history);
+}
+
+function RestoreHistoryInternal(value: any, history: any) : any
+{
+    let result = value;
+
     if(history !== NO_HISTORIC_CHANGES)
     {
-        if(valueRestorationWrapper.valueToRestore === Object(valueRestorationWrapper.valueToRestore))
+        if(value === Object(value))
         {
-            if(Array.isArray(valueRestorationWrapper.valueToRestore))
+            if(Array.isArray(value))
             {
                 if(history.hasOwnProperty("length"))
                 {
-                    RestoreArrayHistory(valueRestorationWrapper, history as ICompressedArrayHistory);
+                    result = RestoreArrayHistory(value, history as ICompressedArrayHistory);
                 }
                 else
                 {
@@ -36,7 +38,7 @@ export function RestoreHistory(valueRestorationWrapper: ValueRestorationWrapper,
             {
                 if(history.hasOwnProperty("newKeys"))
                 {
-                    RestoreObjectHistory(valueRestorationWrapper, history as ICompressedObjectHistory);
+                    result = RestoreObjectHistory(value, history as ICompressedObjectHistory);
                 }
                 else
                 {
@@ -53,19 +55,21 @@ export function RestoreHistory(valueRestorationWrapper: ValueRestorationWrapper,
             }
             else
             {
-                valueRestorationWrapper.valueToRestore = history;
+                result = history;
             }
         }
     }
+
+    return result;
 }
 
-function RestoreArrayHistory(arrayWrapper: ValueRestorationWrapper, history: ICompressedArrayHistory) 
+function RestoreArrayHistory(array: Array<any>, history: ICompressedArrayHistory) : Array<any>
 {
-    let array = arrayWrapper.valueToRestore as Array<any>;
+    let result = array;
 
     if(array.length > history.length)
     {
-        array = array.slice(0, history.length);
+        result = array.slice(0, history.length);
     }
 
     history.changes.forEach((change) => {
@@ -73,13 +77,11 @@ function RestoreArrayHistory(arrayWrapper: ValueRestorationWrapper, history: ICo
         {
             if(change.index < array.length)
             {
-                let valueWrapper = new ValueRestorationWrapper(array[change.index]);
-                RestoreHistory(valueWrapper, change.history);
-                array[change.index] = valueWrapper.valueToRestore;
+                result[change.index] = RestoreHistory(array[change.index], change.history);
             }
             else 
             {
-                array.push(change.history)
+                result.push(change.history)
             }
         }   
         else
@@ -88,31 +90,29 @@ function RestoreArrayHistory(arrayWrapper: ValueRestorationWrapper, history: ICo
         }
     });
 
-    if(array.length < history.length)
+    if(result.length < history.length)
     {
         throw new Error("Insufficient History.");
     }
 
-    arrayWrapper.valueToRestore = array;
+    return result;
 }
 
-function RestoreObjectHistory(objectWrapper: ValueRestorationWrapper, history: ICompressedObjectHistory) 
+function RestoreObjectHistory(obj: Object, history: ICompressedObjectHistory) : Object
 {
-    let obj = objectWrapper.valueToRestore as Object;
+    let result = obj;
 
     //Delete any keys that are new to the value.
     history.newKeys.forEach(newKey => {
-        if(obj.hasOwnProperty(newKey))
+        if(result.hasOwnProperty(newKey))
         {
-            delete obj[newKey as keyof typeof obj];
+            delete result[newKey as keyof typeof result];
         }
     });
     
     history.changes.forEach(change => {
-        let objWrapper = new ValueRestorationWrapper(obj[change.key as keyof typeof obj]);
-        RestoreHistory(objWrapper, change.history);
-        obj[change.key as keyof typeof obj] = objWrapper.valueToRestore;
+        result[change.key as keyof typeof result] = RestoreHistory(result[change.key as keyof typeof result], change.history);
     });
 
-    objectWrapper.valueToRestore = obj;
+    return result;
 }
