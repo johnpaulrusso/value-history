@@ -23,9 +23,9 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
                     throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an array history and newer is not.");
                 }
             }
-            else if(Object(olderHistory).hasOwnProperty("newKeys")) //olderHistory is compressed object history.
+            else if(Object(olderHistory).hasOwnProperty("sameKeys")) //olderHistory is compressed object history.
             {
-                if(Object(newerHistory).hasOwnProperty("newKeys"))
+                if(Object(newerHistory).hasOwnProperty("sameKeys"))
                 {
                     result = AccumulateObjectHistory(olderHistory, newerHistory);
                 }
@@ -67,7 +67,17 @@ export function AccumulateArrayHistory(olderHistory: ICompressedArrayHistory, ne
 
     //first accumulate all the older changes, all are needed.
     olderHistory.changes.forEach(olderChange => {
-        result.changes.push(olderChange);
+        //if there is a corresponding newer change, accumulate!
+        let newerChange = newerHistory.changes.find(newerChange => newerChange.index === olderChange.index);
+        if(newerChange)
+        {
+            result.changes.push({index: olderChange.index, history: AccumulateHistory(olderChange.history, newerChange.history)});
+        }
+        else
+        {
+            result.changes.push(olderChange);
+        }
+        
     });
 
     newerHistory.changes.forEach(newerChange => {
@@ -78,13 +88,17 @@ export function AccumulateArrayHistory(olderHistory: ICompressedArrayHistory, ne
         }
     });
 
+    result.changes.sort((c1: {index: number, history: any}, c2: {index: number, history: any}) => {
+       return c1.index - c2.index
+    })
+
     return result;
 }
 
 export function AccumulateObjectHistory(olderHistory: ICompressedObjectHistory, newerHistory: ICompressedObjectHistory) : ICompressedObjectHistory 
 {
     let result: ICompressedObjectHistory = {
-        newKeys: [],
+        sameKeys: olderHistory.sameKeys && newerHistory.sameKeys,
         changes: []
     }
 
@@ -93,26 +107,16 @@ export function AccumulateObjectHistory(olderHistory: ICompressedObjectHistory, 
         result.changes.push(olderChange);
     });
 
-    //Then accumulate all the older newkeys, all are needed initially.
-    olderHistory.newKeys.forEach(olderNewKey => {
-        result.newKeys.push(olderNewKey);
-    });
-
-    newerHistory.newKeys.forEach(newerNewKey => {
-        if((result.newKeys.findIndex(olderNewKey => olderNewKey === newerNewKey) === -1) 
-         && result.changes.findIndex(olderChange => olderChange.key === newerNewKey) === -1)
-        {
-            result.newKeys.push(newerNewKey);
-        }
-    });
-
-    newerHistory.changes.forEach(newerChange => {
-        //Only take the newer change if the older history doesn't have a change to the same key.
-        if(result.changes.findIndex(olderChange => olderChange.key === newerChange.key) === -1)
-        {
-            result.changes.push(newerChange);
-        }
-    });
+    if(olderHistory.sameKeys)
+    {
+        newerHistory.changes.forEach(newerChange => {
+            //Only take the newer change if the older history doesn't have a change to the same key.
+            if(result.changes.findIndex(olderChange => olderChange.key === newerChange.key) === -1)
+            {
+                result.changes.push(newerChange);
+            }
+        });
+    }
 
     return result;
 }

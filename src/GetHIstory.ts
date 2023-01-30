@@ -93,7 +93,7 @@ function getHistoryArray(originalArray: Array<any>, finalArray: Array<any>) : IC
             }
             else
             {
-                compressedArrayHistory.changes.push({index: index, history: originalValue})
+                historyArray.push(convertValueToHistoryRecord(originalValue)); //Need to convert this to a "history" record.
             }
         })
     }
@@ -121,37 +121,34 @@ function getHistoryArray(originalArray: Array<any>, finalArray: Array<any>) : IC
     return result;
 }
 
+/**
+ * If two objects have a different set of keys, treat them as completely different objects.
+ * This removes the need for the "newKeys" property.
+ * @param originalObject 
+ * @param finalObject 
+ * @returns 
+ */
 function getHistoryObject(originalObject: Object, finalObject: Object) : ICompressedObjectHistory | undefined
 {
     let result: ICompressedObjectHistory | undefined = NO_HISTORIC_CHANGES;
-
-    let originalKeys = Object.entries(originalObject).map(([key, value]) => key);
-    let finalKeys = Object.entries(finalObject).map(([key, value]) => key);
-
-    let allKeys: Array<string> = originalKeys.concat(finalKeys);
-    let allKeysUnique = allKeys.filter((key, index) => allKeys.indexOf(key) === index);
-
-    let history: Object = {};
     let compressedObjectHistory: ICompressedObjectHistory = {
         changes: [],
-        newKeys: []
+        sameKeys: false
     }
 
-    allKeysUnique.forEach((key) => {
-        
-        if(originalKeys.includes(key) && !finalKeys.includes(key))
-        {
-            //Only the old object has the key, so add it directly to the compressed changes.
-            let originalValue = originalObject[key as keyof typeof originalObject];
-            compressedObjectHistory.changes.push({key: key, history: originalValue})
-        }
-        else if(!originalKeys.includes(key) && finalKeys.includes(key))
-        {
-            //New key!
-            compressedObjectHistory.newKeys.push(key);
-        }
-        else //Both 
-        {
+    let originalKeys = Object.entries(originalObject).map(([key, _]) => key);
+    let finalKeys = Object.entries(finalObject).map(([key, _]) => key);
+
+    let valuesHaveSameLength: boolean = originalKeys.length === finalKeys.length;
+    let valuesHaveSameKeys: boolean = false;
+    if(valuesHaveSameLength)
+    {
+        valuesHaveSameKeys = originalKeys.findIndex(oKey => !finalKeys.includes(oKey)) === -1;
+    }
+
+    if(valuesHaveSameLength && valuesHaveSameKeys)
+    {
+        originalKeys.forEach((key) => {
             //Both objects have the key, so get the history!
             let originalValue = originalObject[key as keyof typeof originalObject];
             let finalValue = finalObject[key as keyof typeof finalObject];
@@ -160,13 +157,63 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
             {
                 compressedObjectHistory.changes.push({key: key, history: historyValue})
             }
-        }
-    });
+        });
+        compressedObjectHistory.sameKeys = true;
+    }
+    else
+    {
+        compressedObjectHistory = convertValueToHistoryRecord(originalObject);
+    }
 
-    if(compressedObjectHistory.changes.length !== 0 || compressedObjectHistory.newKeys.length !== 0)
+    if(compressedObjectHistory.changes.length !== 0)
     {
         result = compressedObjectHistory;
     }
 
+    return result;
+}
+
+
+function convertValueToHistoryRecord(value: any) : any
+{
+    let result: any = value;
+    if(value === Object(value))
+    {
+        if(Array.isArray(value))
+        {
+            result = {
+                length: value.length, 
+                changes: value.map((arrVal, index) => {
+                    if(arrVal === Object(arrVal))
+                    {
+                        return {index: index, history: convertValueToHistoryRecord(arrVal)};
+                    }
+                    else
+                    {
+                        return {index: index, history: arrVal};
+                    }
+                })
+            }
+        }
+        else
+        {
+            result = {
+                sameKeys: false,
+                changes: Object.entries(value).map(entry => {
+                    let objKey = entry[0];
+                    let objVal = entry[1];
+                    if( objVal === Object(objVal))
+                    {
+                        return {key: objKey, history: convertValueToHistoryRecord(objVal)};
+                    }
+                    else
+                    {
+                        return {key: objKey, history: objVal};
+                    }
+                    
+                })
+            }
+        }
+    }
     return result;
 }
