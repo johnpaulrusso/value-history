@@ -23,9 +23,9 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
                     throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an array history and newer is not.");
                 }
             }
-            else if(Object(olderHistory).hasOwnProperty("sameKeys")) //olderHistory is compressed object history.
+            else if(Object(olderHistory).hasOwnProperty("changes")) //olderHistory is compressed object history.
             {
-                if(Object(newerHistory).hasOwnProperty("sameKeys"))
+                if(Object(newerHistory).hasOwnProperty("changes") && !Object(newerHistory).hasOwnProperty("length"))
                 {
                     result = AccumulateObjectHistory(olderHistory, newerHistory);
                 }
@@ -110,24 +110,41 @@ export function AccumulateArrayHistory(olderHistory: ICompressedArrayHistory, ne
 export function AccumulateObjectHistory(olderHistory: ICompressedObjectHistory, newerHistory: ICompressedObjectHistory) : ICompressedObjectHistory 
 {
     let result: ICompressedObjectHistory = {
-        sameKeys: olderHistory.sameKeys && newerHistory.sameKeys,
         changes: []
     }
 
-    //first accumulate all the older changes, all are needed.
-    olderHistory.changes.forEach(olderChange => {
-        result.changes.push(olderChange);
-    });
-
-    if(olderHistory.sameKeys)
+    //If the older history has a raw Obj, we need that.
+    if(olderHistory.hasOwnProperty("rawObj"))
     {
-        newerHistory.changes.forEach(newerChange => {
-            //Only take the newer change if the older history doesn't have a change to the same key.
-            if(result.changes.findIndex(olderChange => olderChange.key === newerChange.key) === -1)
-            {
-                result.changes.push(newerChange);
-            }
+        result.rawObj = olderHistory.rawObj;
+
+        if(olderHistory.changes.length > 0)
+        {
+            throw new Error("Incompatible Histories - object history cannot contain both changes and a raw object.");
+        }
+    }
+    else if(newerHistory.hasOwnProperty("rawObj") && newerHistory.changes.length > 0)
+    {
+        throw new Error("Incompatible Histories - object history cannot contain both changes and a raw object.");
+    }
+    else
+    {
+        //accumulate all the older changes, all are needed. This could be empty.
+        olderHistory.changes.forEach(olderChange => {
+            result.changes.push(olderChange);
         });
+
+        //Only take the newer changes if rawObj does not exist on the older history.
+        if(!olderHistory.hasOwnProperty("rawObj"))
+        {
+            newerHistory.changes.forEach(newerChange => {
+                //Only take the newer change if the older history doesn't have a change to the same key.
+                if(result.changes.findIndex(olderChange => olderChange.key === newerChange.key) === -1)
+                {
+                    result.changes.push(newerChange);
+                }
+            });
+        }
     }
 
     return result;

@@ -69,50 +69,44 @@ describe('Accumulate History (w/ Primitives)', () => {
       expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, {sameKeys: true, changes: [{key: "1", history: 1}]})).toBe(valuehistory.NO_HISTORIC_CHANGES)
     });
     it('should return the older history item if the newer history item is NO_HISTORIC_CHANGES', () => {
-        expect(valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "1", history: 1}]}, valuehistory.NO_HISTORIC_CHANGES)).toStrictEqual({sameKeys: true, changes: [{key: "1", history: 1}]})
+        expect(valuehistory.AccumulateHistory({changes: [{key: "1", history: 1}]}, valuehistory.NO_HISTORIC_CHANGES)).toStrictEqual({changes: [{key: "1", history: 1}]})
       });
-    it('should return compressed object history if new keys are both empty and the same key changed in both histories.', () => {
-      expect(valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "v1", history: 1}]}, 
-                                            {sameKeys: true, changes: [{key: "v1", history: 2}]})
-                                    ).toStrictEqual({sameKeys: true, changes: [{key: "v1", history: 1}]})
+    it('should return compressed object history if no rawObj is present and the same key changed in both histories.', () => {
+      expect(valuehistory.AccumulateHistory({changes: [{key: "v1", history: 1}]}, 
+                                            {changes: [{key: "v1", history: 2}]})
+                                    ).toStrictEqual({changes: [{key: "v1", history: 1}]})
     });
-    it('should return compressed object history if new keys are both empty and a different keys changed in both histories.', () => {
-        expect(valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "v1", history: 1}]}, 
-                                              {sameKeys: true, changes: [{key: "v2", history: 2}]})
-                                      ).toStrictEqual({sameKeys: true, changes: [{key: "v1", history: 1}, {key: "v2", history: 2}]})
+    it('should return compressed object history if no rawObj is present and a different keys changed in both histories.', () => {
+        expect(valuehistory.AccumulateHistory({changes: [{key: "v1", history: 1}]}, 
+                                              {changes: [{key: "v2", history: 2}]})
+                                      ).toStrictEqual({changes: [{key: "v1", history: 1}, {key: "v2", history: 2}]})
     });
     
-    it('should remove newKeys that are present in the older history item', () => {
-        expect(valuehistory.AccumulateHistory({sameKeys: false, changes: [{key: "v1", history: 1}]}, 
-                                              {sameKeys: true, changes: [{key: "v2", history: 2}]})
-                                      ).toStrictEqual({sameKeys: false, changes: [{key: "v1", history: 1}]})
+    it('should return the older history if rawObj is present in the older history', () => {
+        expect(valuehistory.AccumulateHistory({changes: [], rawObj: {v1: 1, v2: 2}}, 
+                                              {changes: [{key: "v2", history: 2}]})
+                                      ).toStrictEqual({changes: [], rawObj: {v1: 1, v2: 2}})
     });
-    it('should carry over keys that are present in the newer history but not the older history item (part 1)', () => {
-        expect(valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "v1", history: 1}]}, 
-                                              {sameKeys: false, changes: [{key: "v2", history: 2}]})
-                                      ).toStrictEqual({sameKeys: false, changes: [{key: "v1", history: 1}, {key: "v2", history: 2}]})
+
+    it('should return ignore rawObj in newer history if rawObj is not present in the older history', () => {
+        expect(valuehistory.AccumulateHistory({changes: [{key: "v1", history: 2}]}, 
+                                              {changes: [], rawObj: {v1: 1, v2: 2}})
+                                      ).toStrictEqual({changes: [{key: "v1", history: 2}]})
     });
-    it('should carry over keys that are present in the newer history and the older history item', () => {
-        expect(valuehistory.AccumulateHistory({sameKeys: false, changes: [{key: "v1", history: 1}, {key: "v2", history: 2}]}, 
-                                              {sameKeys: false, changes: [{key: "v2", history: 2}]})
-                                      ).toStrictEqual({sameKeys: false, changes: [{key: "v1", history: 1}, {key: "v2", history: 2}]})
+    it('should throw an error if newer object history has both changes and a raw object.', () => {
+        expect(() => {
+          valuehistory.AccumulateHistory({changes: [{key: "v1", history: 1}]}, 
+                                         {changes: [{key: "v1", history: 2}], rawObj: {v1: 1, v2: 2}})
+        }).toThrow("Incompatible Histories - object history cannot contain both changes and a raw object.");
     });
-    it('should carry over keys that are present in the older history and NOT the newer history item', () => {
-        expect(valuehistory.AccumulateHistory({sameKeys: false, changes: [{key: "v1", history: 1}]}, 
-                                              {sameKeys: false, changes: [{key: "v2", history: 2}]})
-                                      ).toStrictEqual({sameKeys: false, changes: [{key: "v1", history: 1}]})
-    });
-    it('should carry over keys that are present in the newer history but not the older history item (part 2)', () => {
-      expect(valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "v2", history: 2}, {key: "v4", history: 4}]}, 
-                                            {sameKeys: false, changes: []})
-                                    ).toStrictEqual({sameKeys: false, changes: [{key: "v2", history: 2}, {key: "v4", history: 4}]})
+    it('should throw an error if older object history has both changes and a raw object.', () => {
+      expect(() => {
+        valuehistory.AccumulateHistory({changes: [{key: "v1", history: 1}], rawObj: {v1: 1, v2: 2}}, 
+                                       {changes: [{key: "v1", history: 2}]})
+      }).toThrow("Incompatible Histories - object history cannot contain both changes and a raw object.");
   });
-    it('should throw an error if original value is an object history and final value is a primitive history.', () => {
-        expect(() => {valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "v1", history: 1}]}, 1)})
-          .toThrow("Incompatible Histories - older is an object history and newer is not.");
-    });
     it('should throw an error if original value is an object history and final value is an array history.', () => {
-      expect(() => {valuehistory.AccumulateHistory({sameKeys: true, changes: [{key: "v1", history: 1}]}, {length: 4, changes: [{index: 3, history: 2}]})})
+      expect(() => {valuehistory.AccumulateHistory({changes: [{key: "v1", history: 1}]}, {length: 4, changes: [{index: 3, history: 2}]})})
         .toThrow("Incompatible Histories - older is an object history and newer is not.");
     });
     it('should throw an error if original value is an unrecognized history type.', () => {

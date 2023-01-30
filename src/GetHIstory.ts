@@ -143,8 +143,7 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
 {
     let result: ICompressedObjectHistory | undefined = NO_HISTORIC_CHANGES;
     let compressedObjectHistory: ICompressedObjectHistory = {
-        changes: [],
-        sameKeys: false
+        changes: []
     }
 
     let originalKeys = Object.entries(originalObject).map(([key, _]) => key);
@@ -166,17 +165,16 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
             let historyValue = GetHistory(originalValue, finalValue);
             if(historyValue !== NO_HISTORIC_CHANGES)
             {
-                compressedObjectHistory.changes.push({key: key, history: historyValue})
+                compressedObjectHistory.changes!.push({key: key, history: historyValue})
             }
         });
-        compressedObjectHistory.sameKeys = true;
     }
     else
     {
-        compressedObjectHistory = convertValueToHistoryRecord(originalObject);
+        compressedObjectHistory.rawObj = originalObject; //And everything in it.
     }
 
-    if(compressedObjectHistory.changes.length !== 0)
+    if(compressedObjectHistory.changes.length !== 0 || compressedObjectHistory.rawObj)
     {
         result = compressedObjectHistory;
     }
@@ -209,20 +207,8 @@ function convertValueToHistoryRecord(value: any) : any
         else
         {
             result = {
-                sameKeys: false,
-                changes: Object.entries(value).map(entry => {
-                    let objKey = entry[0];
-                    let objVal = entry[1];
-                    if( objVal === Object(objVal))
-                    {
-                        return {key: objKey, history: convertValueToHistoryRecord(objVal)};
-                    }
-                    else
-                    {
-                        return {key: objKey, history: objVal};
-                    }
-                    
-                })
+                changes: [],
+                rawObj: value
             }
         }
     }

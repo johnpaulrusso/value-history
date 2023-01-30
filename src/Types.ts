@@ -17,6 +17,6 @@ export interface ICompressedArrayHistory
 
 export interface ICompressedObjectHistory
 {
-    sameKeys: boolean
-    changes: Array<{key: string, history: any}>
+    changes: Array<{key: string, history: any}> //If sameKeys is true, this will be populated.
+    rawObj?: Object //If sameKeys is false, this will be populated.
 }

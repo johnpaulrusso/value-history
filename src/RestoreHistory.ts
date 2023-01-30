@@ -47,7 +47,7 @@ function RestoreHistoryInternal(value: any, history: any) : any
                         throw new ValueHistoryTypeMismatchError("Value is a Date and history is not."); 
                     }
                 }
-                else if(history.hasOwnProperty("sameKeys"))
+                else if(history.hasOwnProperty("changes") && !history.hasOwnProperty("length"))
                 {
                     result = RestoreObjectHistory(value, history as ICompressedObjectHistory);
                 }
@@ -113,66 +113,16 @@ function RestoreObjectHistory(obj: Object, history: ICompressedObjectHistory) : 
 {
     let result: Object = {};
     
-    if(history.sameKeys)
+    if(history.rawObj)
+    {
+        result = history.rawObj;
+    }
+    else
     {
         result = obj;
-        history.changes.forEach(change => {
+        history.changes!.forEach(change => {
             result[change.key as keyof typeof result] = RestoreHistory(result[change.key as keyof typeof result], change.history);
         });
-    }
-    else
-    {
-        history.changes.forEach(change => {
-            let temp = convertHistoryRecordToValue(change.history);
-            result[change.key as keyof typeof result] = temp
-        });
-    }
-
-    return result;
-}
-
-function convertHistoryRecordToValue(history: any) : any
-{
-    let result: any;
-    if(history === Object(history))
-    {
-        if(history.hasOwnProperty('length'))
-        {
-            let array: Array<any> = [];
-            let arrHist = history as ICompressedArrayHistory;
-            for(let i = 0; i < arrHist.length; ++i)
-            {
-                let v = arrHist.changes.find(change => change.index === i);
-                if(v)
-                {
-                    array.push(convertHistoryRecordToValue(v.history))
-                }
-                else
-                {
-                    throw new Error("Could not convert unrecognized history format to value.");
-                }
-            }
-            result = array;
-        }
-        else if(history.hasOwnProperty('sameKeys'))
-        {
-            let obj: Object = {};
-            let objHist = history as ICompressedObjectHistory;
-
-            objHist.changes.forEach(change => {
-                obj[change.key as keyof typeof obj] = convertHistoryRecordToValue(change.history);
-            })
-
-            result = obj;
-        }
-        else
-        {
-            throw new Error("Could not convert unrecognized history format to value.");
-        }
-    }
-    else
-    {
-        result = history;
     }
 
     return result;

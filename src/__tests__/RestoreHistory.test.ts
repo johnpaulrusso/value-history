@@ -80,19 +80,19 @@ describe('Restore History (w/ Objects)', () => {
         expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3}, valuehistory.NO_HISTORIC_CHANGES)).toEqual({v1: 1, v2: 2, v3: 3});
     });
     it('should restore the history if final value is the same as history.', () => {
-        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {sameKeys: true, changes: []})).toEqual({v1: 1, v2: 2, v3: 3});
+        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {changes: []})).toEqual({v1: 1, v2: 2, v3: 3});
     });
     it('should restore the history if final value is NOT the same as history and history has no new keys.', () => {   
-        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {sameKeys: true, changes: [{key: "v1", history: 0}]})).toEqual({v1: 0, v2: 2, v3: 3});
+        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {changes: [{key: "v1", history: 0}]})).toEqual({v1: 0, v2: 2, v3: 3});
     });
     it('should restore the history if there are no new keys and the history contains a key that the value does not have.', () => {
-        expect(valuehistory.RestoreHistory({v1: 1, v2: 2},  {sameKeys: false, changes: [{key: "v3", history: 3}]})).toEqual({v3: 3});
+        expect(valuehistory.RestoreHistory({v1: 1, v2: 2},  {changes: [], rawObj: {v3: 3}})).toEqual({v3: 3});
     });
     it('should restore the history if there are one or more new keys and the history contains no changes.', () => {
-        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {sameKeys: false, changes: [{key: "v1", history: 1}, {key: "v2", history: 2}]})).toEqual({v1: 1, v2: 2});
+        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {changes: [], rawObj: {v1: 1, v2: 2}})).toEqual({v1: 1, v2: 2});
     });
     it('should restore the history if there are one or more new keys and the history contains one ore more changes.', () => {        
-        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {sameKeys: true, changes: [{key: "v2", history: 0}]})).toEqual({v1: 1, v2: 0, v3: 3});
+        expect(valuehistory.RestoreHistory({v1: 1, v2: 2, v3: 3},  {changes: [{key: "v2", history: 0}]})).toEqual({v1: 1, v2: 0, v3: 3});
     });
     it('should throw an error if final value is an object and history value is for a primitive.', () => {
         expect(() => {
@@ -114,7 +114,7 @@ describe('Restore History (w/ Arrays of Objects)', () => {
 
 describe('Restore History (w/ Arrays of Objects)', () => {
     it('should restore an array of objects with different keys', () => {
-        expect(valuehistory.RestoreHistory([{v1: 1}], {length: 1, changes: [{index: 0, history: {sameKeys: false, changes: [{key: "v2", history: 2}]}}]})).toEqual([{v2: 2}]);
+        expect(valuehistory.RestoreHistory([{v1: 1}], {length: 1, changes: [{index: 0, history: {changes: [], rawObj: {v2: 2}}}]})).toEqual([{v2: 2}]);
     });
 });
 
@@ -153,28 +153,6 @@ describe('Restore History (w/ Arrays of Objects)', () => {
         expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
     });
 });
-
-
-describe('Restore History (w/ Arrays of Objects)', () => {
-    it('should throw an error history is incomplete.', () => {
-        let v1 = {v2: [1,2,3]}
-        let h = {sameKeys: false, changes: [{key: "v1", history: {length: 2, changes: [{index: 0, history: 1}]}}]}
-        expect(() => {
-            valuehistory.RestoreHistory(v1, h)
-        }).toThrow("Could not convert unrecognized history format to value.");
-    });
-});
-
-describe('Restore History (w/ Arrays of Objects)', () => {
-    it('should throw an error history format is inrecognized.', () => {
-        let v1 = {v2: {v1: 2}}
-        let h = {sameKeys: false, changes: [{key: "v1", history: {foo: 2, changes: [{index: 0, history: 1}]}}]}
-        expect(() => {
-            valuehistory.RestoreHistory(v1, h)
-        }).toThrow("Could not convert unrecognized history format to value.");
-    });
-});
-
 
 describe('Restore History (w/ Dates)', () => {
     
