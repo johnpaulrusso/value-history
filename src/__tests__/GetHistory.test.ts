@@ -104,3 +104,15 @@ describe('Get History (w/ Objects of Arrays of Arrays)', () => {
     expect(valuehistory.GetHistory(v0, v1)).toStrictEqual(expected);
   });
 });
+
+describe('Get History (w/ Dates)', () => {
+  it('should get history of Dates', () => {
+    let v0 = new Date(2023,2);
+    let v1 = new Date(2023,3);
+    expect(valuehistory.GetHistory(v0, v1)).toStrictEqual(v0);
+  });
+  it('should throw an error if original value is a Date and final value is not.', () => {
+    let v0 = new Date(2023,2);
+    expect(() => {valuehistory.GetHistory(v0, [1,2,3])}).toThrow("Original value is a Date and final value is not")
+  });
+});

@@ -174,3 +174,20 @@ describe('Restore History (w/ Arrays of Objects)', () => {
         }).toThrow("Could not convert unrecognized history format to value.");
     });
 });
+
+
+describe('Restore History (w/ Dates)', () => {
+    
+    it('should restore history to a Date.', () => {
+        let vf = new Date(2022, 2);
+        let h = new Date(2021, 5);
+        expect(valuehistory.RestoreHistory(vf, h)).toBe(h)
+    });
+    it('should throw an error if final value is a Date and history is not.', () => {
+        let vf = new Date(2022, 2);
+        let h = {v1: 1};
+        expect(() => {
+            valuehistory.RestoreHistory(vf,  h)
+        }).toThrow("Value is a Date and history is not.");
+    });
+});

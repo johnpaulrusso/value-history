@@ -34,6 +34,18 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
                     throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an object history and newer is not.");
                 }
             }
+            else if(Object.prototype.toString.call(olderHistory) === '[object Date]')
+            {
+                if(Object.prototype.toString.call(newerHistory) === '[object Date]')
+                {
+                    result = olderHistory; 
+                }
+                else
+                {
+                    throw new ValueHistoryTypeMismatchError("Incompatible Histories - older history is a Date and newer is not.");
+                }
+                
+            }
             else
             {
                 throw new ValueHistoryTypeMismatchError("Incompatible Histories - Unrecognized history types.");

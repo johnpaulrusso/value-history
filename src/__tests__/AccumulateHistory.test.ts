@@ -160,3 +160,17 @@ describe('Accumulate History (w/ Objects of Objects)', () => {
   });
 });
 
+describe('Accumulate History (w/ Dates)', () => {
+  it('should return the historic Date if both value and history are Dates.', () => {
+    let h0 = new Date(2022, 2);
+    let h1 = new Date(2021, 1);
+    expect(valuehistory.AccumulateHistory(h0, h1)).toBe(h0);
+  });
+  it('should throw an error if the older history is a Date and history is not.', () => {
+    let v = new Date(2022, 2);
+    let h = [2,3];
+    expect(() => {valuehistory.AccumulateHistory(v, h)})
+      .toThrow("Incompatible Histories - older history is a Date and newer is not.");
+  });
+});
+   

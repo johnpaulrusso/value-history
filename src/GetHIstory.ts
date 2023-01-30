@@ -17,6 +17,17 @@ export function GetHistory(originalValue: any, finalValue: any) : any
                 return getHistoryArray(originalValue, finalValue);
             }
         }
+        else if(Object.prototype.toString.call(originalValue) === '[object Date]')
+        {
+            if(Object.prototype.toString.call(finalValue) === '[object Date]')
+            {
+                result = getHistoryPrimitive(originalValue, finalValue);
+            }
+            else
+            {
+                throw new ValueHistoryTypeMismatchError("Original value is a Date and final value is not.");
+            }
+        }
         else //originalValue is an Object
         {
             if(finalValue !== Object(finalValue))

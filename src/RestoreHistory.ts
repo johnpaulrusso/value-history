@@ -36,11 +36,22 @@ function RestoreHistoryInternal(value: any, history: any) : any
             }
             else
             {
-                if(history.hasOwnProperty("sameKeys"))
+                if(Object.prototype.toString.call(value) === '[object Date]')
+                {
+                    if(Object.prototype.toString.call(history) === '[object Date]')
+                    {
+                        result = history;
+                    }
+                    else
+                    {
+                        throw new ValueHistoryTypeMismatchError("Value is a Date and history is not."); 
+                    }
+                }
+                else if(history.hasOwnProperty("sameKeys"))
                 {
                     result = RestoreObjectHistory(value, history as ICompressedObjectHistory);
                 }
-                else
+                else 
                 {
                     throw new ValueHistoryTypeMismatchError("Value is an object and history is not.");
                 }
