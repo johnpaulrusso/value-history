@@ -52,6 +52,12 @@ describe('Restore History (w/ Arrays)', () => {
     it('should restore the history to an array that is longer than the original.', () => {
         expect(valuehistory.RestoreHistory([1], {l:2, c: [{i: 1, h: 2}]})).toEqual([1,2]);
     });
+    it('should restore the history from an empty array.', () => {
+        expect(valuehistory.RestoreHistory([], {l:1, c: [{i: 0, h: 2}]})).toEqual([2]);
+    });
+    it('should restore the history to an empty array.', () => {
+        expect(valuehistory.RestoreHistory([2], {l:0, c: []})).toEqual([]);
+    });
     it('should throw an error if insufficient history is provided to construct the original array.', () => {
         expect(() => {
             valuehistory.RestoreHistory([1], {l:3, c: [{i: 1, h: 1}]})
@@ -110,6 +116,12 @@ describe('Restore History (w/ Arrays of Objects)', () => {
     it('should restore an array of objects', () => {
         expect(valuehistory.RestoreHistory([{v1: 1}], {l:1, c: [{i: 0, h: {sameKeys: true, c: [{k: "v1", h: 2}]}}]})).toEqual([{v1: 2}]);
     });
+    it('should restore an array of objects from an empty array', () => {
+        expect(valuehistory.RestoreHistory([], {l:1, c: [{i: 0, h: {c: [], o: {v1: 2}}}]})).toEqual([{v1: 2}]);
+    });
+    it('should restore an array of objects to an empty array', () => {
+        expect(valuehistory.RestoreHistory([{v1: 2}], {l:0, c: []})).toEqual([]);
+    });
 });
 
 describe('Restore History (w/ Arrays of Objects)', () => {
@@ -118,10 +130,22 @@ describe('Restore History (w/ Arrays of Objects)', () => {
     });
 });
 
-describe('Restore History (w/ Arrays of Objects)', () => {
+describe('Restore History (w/ Arrays of Arrays)', () => {
     it('should restore deeply nested arrays', () => {
         let v0 = [[[1]],[[2]]];
         let v1 = [[[1]],[[3]]];
+        let h = valuehistory.GetHistory(v0, v1);
+        expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
+    });
+    it('should restore an array of arrays from an empty array', () => {
+        let v0: any[] = [];
+        let v1: any[] = [[1]];
+        let h = valuehistory.GetHistory(v0, v1);
+        expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
+    });
+    it('should restore an array of arrays to an empty array', () => {
+        let v0 = [[1]];
+        let v1 = [[0]];
         let h = valuehistory.GetHistory(v0, v1);
         expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
     });

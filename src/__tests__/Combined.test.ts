@@ -178,7 +178,7 @@ describe('Get, Accumulate, and Restore History', () => {
                 {
                     name: "bar",
                     id: 1,
-                    children: []
+                    children: [1]
                 }
             ],
         }

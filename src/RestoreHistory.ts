@@ -92,7 +92,14 @@ function RestoreArrayHistory(array: any[], history: ICompressedArrayHistory) : a
             }
             else 
             {
-                result.push(c.h)
+                if(c.h.hasOwnProperty('o'))
+                {
+                    result.push(c.h.o)
+                }
+                else
+                {
+                    result.push(c.h)
+                }
             }
         }   
         else
