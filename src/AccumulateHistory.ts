@@ -12,9 +12,9 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
         }
         else if(olderHistory === Object(olderHistory))
         {
-            if(Object(olderHistory).hasOwnProperty("length")) //olderHistory is compressed array history.
+            if(Object(olderHistory).hasOwnProperty("l")) //olderHistory is compressed array history.
             {
-                if(Object(newerHistory).hasOwnProperty("length"))
+                if(Object(newerHistory).hasOwnProperty("l"))
                 {
                     result = AccumulateArrayHistory(olderHistory, newerHistory);
                 }
@@ -23,9 +23,9 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
                     throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an array history and newer is not.");
                 }
             }
-            else if(Object(olderHistory).hasOwnProperty("changes")) //olderHistory is compressed object history.
+            else if(Object(olderHistory).hasOwnProperty("c")) //olderHistory is compressed object history.
             {
-                if(Object(newerHistory).hasOwnProperty("changes") && !Object(newerHistory).hasOwnProperty("length"))
+                if(Object(newerHistory).hasOwnProperty("c") && !Object(newerHistory).hasOwnProperty("l"))
                 {
                     result = AccumulateObjectHistory(olderHistory, newerHistory);
                 }
@@ -70,38 +70,38 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
 export function AccumulateArrayHistory(olderHistory: ICompressedArrayHistory, newerHistory: ICompressedArrayHistory) : ICompressedArrayHistory 
 {
     let result: ICompressedArrayHistory = {
-        length: 0,
-        changes: []
+        l: 0,
+        c: []
     }
 
     //Always use the oldest length
-    result.length = olderHistory.length;
+    result.l = olderHistory.l;
 
     //first accumulate all the older changes, all are needed.
-    olderHistory.changes.forEach(olderChange => {
+    olderHistory.c.forEach(olderChange => {
         //if there is a corresponding newer change, accumulate!
-        let newerChange = newerHistory.changes.find(newerChange => newerChange.index === olderChange.index);
+        let newerChange = newerHistory.c.find(newerChange => newerChange.i === olderChange.i);
         if(newerChange)
         {
-            result.changes.push({index: olderChange.index, history: AccumulateHistory(olderChange.history, newerChange.history)});
+            result.c.push({i: olderChange.i, h: AccumulateHistory(olderChange.h, newerChange.h)});
         }
         else
         {
-            result.changes.push(olderChange);
+            result.c.push(olderChange);
         }
         
     });
 
-    newerHistory.changes.forEach(newerChange => {
+    newerHistory.c.forEach(newerChange => {
         //Only take the newer change if its index is less than the older length AND the older history doesn't have a change to the same index.
-        if((newerChange.index < result.length) && (result.changes.findIndex(olderChange => olderChange.index === newerChange.index) === -1))
+        if((newerChange.i < result.l) && (result.c.findIndex(olderChange => olderChange.i === newerChange.i) === -1))
         {
-            result.changes.push(newerChange);
+            result.c.push(newerChange);
         }
     });
 
-    result.changes.sort((c1: {index: number, history: any}, c2: {index: number, history: any}) => {
-       return c1.index - c2.index
+    result.c.sort((c1: {i: number, h: any}, c2: {i: number, h: any}) => {
+       return c1.i - c2.i
     })
 
     return result;
@@ -110,38 +110,38 @@ export function AccumulateArrayHistory(olderHistory: ICompressedArrayHistory, ne
 export function AccumulateObjectHistory(olderHistory: ICompressedObjectHistory, newerHistory: ICompressedObjectHistory) : ICompressedObjectHistory 
 {
     let result: ICompressedObjectHistory = {
-        changes: []
+        c: []
     }
 
     //If the older history has a raw Obj, we need that.
-    if(olderHistory.hasOwnProperty("rawObj"))
+    if(olderHistory.hasOwnProperty("o"))
     {
-        result.rawObj = olderHistory.rawObj;
+        result.o = olderHistory.o;
 
-        if(olderHistory.changes.length > 0)
+        if(olderHistory.c.length > 0)
         {
             throw new Error("Incompatible Histories - object history cannot contain both changes and a raw object.");
         }
     }
-    else if(newerHistory.hasOwnProperty("rawObj") && newerHistory.changes.length > 0)
+    else if(newerHistory.hasOwnProperty("o") && newerHistory.c.length > 0)
     {
         throw new Error("Incompatible Histories - object history cannot contain both changes and a raw object.");
     }
     else
     {
         //accumulate all the older changes, all are needed. This could be empty.
-        olderHistory.changes.forEach(olderChange => {
-            result.changes.push(olderChange);
+        olderHistory.c.forEach(olderChange => {
+            result.c.push(olderChange);
         });
 
         //Only take the newer changes if rawObj does not exist on the older history.
-        if(!olderHistory.hasOwnProperty("rawObj"))
+        if(!olderHistory.hasOwnProperty("o"))
         {
-            newerHistory.changes.forEach(newerChange => {
+            newerHistory.c.forEach(newerChange => {
                 //Only take the newer change if the older history doesn't have a change to the same key.
-                if(result.changes.findIndex(olderChange => olderChange.key === newerChange.key) === -1)
+                if(result.c.findIndex(olderChange => olderChange.k === newerChange.k) === -1)
                 {
-                    result.changes.push(newerChange);
+                    result.c.push(newerChange);
                 }
             });
         }

@@ -80,8 +80,8 @@ function getHistoryArray(originalArray: Array<any>, finalArray: Array<any>) : IC
 
     let historyArray: Array<any> = []
     let compressedArrayHistory: ICompressedArrayHistory = {
-        length: OL,
-        changes: []
+        l: OL,
+        c: []
     }
 
     if(OL < FL) //Gained one or more values
@@ -120,11 +120,11 @@ function getHistoryArray(originalArray: Array<any>, finalArray: Array<any>) : IC
     historyArray.forEach((history, index) => {
         if(history !== NO_HISTORIC_CHANGES)
         {
-            compressedArrayHistory.changes.push({index: index, history: history})
+            compressedArrayHistory.c.push({i: index, h: history})
         }
     });
     
-    if(OL !== FL || compressedArrayHistory.changes.length !== 0)
+    if(OL !== FL || compressedArrayHistory.c.length !== 0)
     {
         result = compressedArrayHistory;
     } 
@@ -143,7 +143,7 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
 {
     let result: ICompressedObjectHistory | undefined = NO_HISTORIC_CHANGES;
     let compressedObjectHistory: ICompressedObjectHistory = {
-        changes: []
+        c: []
     }
 
     let originalKeys = Object.entries(originalObject).map(([key, _]) => key);
@@ -165,16 +165,16 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
             let historyValue = GetHistory(originalValue, finalValue);
             if(historyValue !== NO_HISTORIC_CHANGES)
             {
-                compressedObjectHistory.changes!.push({key: key, history: historyValue})
+                compressedObjectHistory.c!.push({k: key, h: historyValue})
             }
         });
     }
     else
     {
-        compressedObjectHistory.rawObj = originalObject; //And everything in it.
+        compressedObjectHistory.o = originalObject; //And everything in it.
     }
 
-    if(compressedObjectHistory.changes.length !== 0 || compressedObjectHistory.rawObj)
+    if(compressedObjectHistory.c.length !== 0 || compressedObjectHistory.o)
     {
         result = compressedObjectHistory;
     }
@@ -191,25 +191,25 @@ function convertValueToHistoryRecord(value: any) : any
         if(Array.isArray(value))
         {
             result = {
-                length: value.length, 
-                changes: value.map((arrVal, index) => {
+                l: value.length, 
+                c: value.map((arrVal, index) => {
                     if(arrVal === Object(arrVal))
                     {
-                        return {index: index, history: convertValueToHistoryRecord(arrVal)};
+                        return {i: index, h: convertValueToHistoryRecord(arrVal)};
                     }
                     else
                     {
-                        return {index: index, history: arrVal};
+                        return {i: index, h: arrVal};
                     }
-                })
-            }
+                }) 
+            } as ICompressedArrayHistory;
         }
         else
         {
             result = {
-                changes: [],
-                rawObj: value
-            }
+                c: [],
+                o: value
+            } as ICompressedObjectHistory;
         }
     }
     return result;

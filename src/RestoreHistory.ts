@@ -25,7 +25,7 @@ function RestoreHistoryInternal(value: any, history: any) : any
         {
             if(Array.isArray(value))
             {
-                if(history.hasOwnProperty("length"))
+                if(history.hasOwnProperty("l"))
                 {
                     result = RestoreArrayHistory(value, history as ICompressedArrayHistory);
                 }
@@ -47,7 +47,7 @@ function RestoreHistoryInternal(value: any, history: any) : any
                         throw new ValueHistoryTypeMismatchError("Value is a Date and history is not."); 
                     }
                 }
-                else if(history.hasOwnProperty("changes") && !history.hasOwnProperty("length"))
+                else if(history.hasOwnProperty("c") && !history.hasOwnProperty("l"))
                 {
                     result = RestoreObjectHistory(value, history as ICompressedObjectHistory);
                 }
@@ -78,21 +78,21 @@ function RestoreArrayHistory(array: Array<any>, history: ICompressedArrayHistory
 {
     let result = array;
 
-    if(array.length > history.length)
+    if(array.length > history.l)
     {
-        result = array.slice(0, history.length);
+        result = array.slice(0, history.l);
     }
 
-    history.changes.forEach((change) => {
-        if(change.index < history.length)
+    history.c.forEach((c) => {
+        if(c.i < history.l)
         {
-            if(change.index < array.length)
+            if(c.i < array.length)
             {
-                result[change.index] = RestoreHistory(array[change.index], change.history);
+                result[c.i] = RestoreHistory(array[c.i], c.h);
             }
             else 
             {
-                result.push(change.history)
+                result.push(c.h)
             }
         }   
         else
@@ -101,7 +101,7 @@ function RestoreArrayHistory(array: Array<any>, history: ICompressedArrayHistory
         }
     });
 
-    if(result.length < history.length)
+    if(result.length < history.l)
     {
         throw new Error("Insufficient History.");
     }
@@ -113,15 +113,15 @@ function RestoreObjectHistory(obj: Object, history: ICompressedObjectHistory) : 
 {
     let result: Object = {};
     
-    if(history.rawObj)
+    if(history.o)
     {
-        result = history.rawObj;
+        result = history.o;
     }
     else
     {
         result = obj;
-        history.changes!.forEach(change => {
-            result[change.key as keyof typeof result] = RestoreHistory(result[change.key as keyof typeof result], change.history);
+        history.c!.forEach(c => {
+            result[c.k as keyof typeof result] = RestoreHistory(result[c.k as keyof typeof result], c.h);
         });
     }
 
