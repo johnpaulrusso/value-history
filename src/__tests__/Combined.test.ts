@@ -97,8 +97,6 @@ describe('Get, Accumulate, and Restore History', () => {
         expect(v0_restored).toStrictEqual(v0_restored_acc);
     });
 
-
-
     it('should get, accumulate, and restore arrays of objects', () => {
         let v0 = [{v1: 1, v2: 2, v3: 3, v4: 4}, {v11: 11, v12: 12}];
         let v1 = [{v1: 1, v2: 0, v3: 3}];
@@ -113,5 +111,62 @@ describe('Get, Accumulate, and Restore History', () => {
         let v0_restored_acc = valuehistory.RestoreHistory(vf, h0f_acc);
         expect(v0_restored).toStrictEqual(v0_restored_acc); 
     });
+
+    it('should get, accumulate, and restore deeply nested JSON with primitives, arrays, dates, and objects', () => {
+
+        let v0 = {
+            name: "foo",
+            id: 0,
+            dateCreated: new Date(2022,1),
+            children: [
+                {
+                    name: "bar",
+                    id: 1,
+                    children: []
+                }
+            ],
+        }
+        let v1 = {
+            name: "xyz",
+            id: 0,
+            dateCreated: new Date(2022,1),
+            children: [
+                {
+                    name: "bar",
+                    id: 1,
+                    children: []
+                }
+            ],
+        }
+        let v2 = {
+            name: "xyz",
+            id: 0,
+            dateCreated: new Date(2022,3),
+            children: [
+                {
+                    name: "bar",
+                    id: 1,
+                    children: []
+                },
+                {
+                    name: "bar2",
+                    id: 2,
+                    children: []
+                }
+            ],
+        }
+
+
+        let h01 = valuehistory.GetHistory(v0, v1);
+        let h12 = valuehistory.GetHistory(v1, v2); 
+        let h02 = valuehistory.GetHistory(v0, v2);
+        let h02_acc = valuehistory.AccumulateHistory(h01, h12);
+        expect(h02).toStrictEqual(h02_acc);
+
+        let v0_restored = valuehistory.RestoreHistory(v2, h02);
+        let v0_restored_acc = valuehistory.RestoreHistory(v2, h02_acc);
+        expect(v0_restored).toStrictEqual(v0_restored_acc); 
+    });
+
   });
   
