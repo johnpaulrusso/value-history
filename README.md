@@ -12,9 +12,9 @@ let history = valuehistory.GetHistory(1,2);
 ```
 
 ### GetHistory
-Values passed to GetHistory must be of the same type. This works for primitives, arrays, and objects. (Arrays are treated differently than objects even though they are also objects.) Calling this method on two different types will result in an error. (See below.)
+Values passed to GetHistory must be of the same type. This works for primitives, dates, arrays, and objects. (Arrays are treated differently than objects even though they are also objects.) Calling this method on two different types will result in an error. (See below.)
 #### Primitives
-For primitives (and Dates) the history is simple the original value.
+For primitives (and Dates) the history is simply the original value.
 ```javascript
 let v0 = 1;
 let vf = 2;
