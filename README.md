@@ -2,7 +2,7 @@
 A simple module to calculate, accumulate, and restore the differences between two values. Supported values include primitives, dates, arrays, and JSON.
 ## Usage
 
-###Installation
+### Installation
 ```
 npm install value-history
 ```
