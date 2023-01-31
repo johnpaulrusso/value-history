@@ -2,6 +2,11 @@
 A simple module to calculate, accumulate, and restore the differences between two values. Supported values include primitives, dates, arrays, and JSON.
 ## Usage
 
+###Installation
+```
+npm install value-history
+```
+
 ### GetHistory
 Values passed to GetHistory must be of the same type. This works for primitives, arrays, and objects. (Arrays are treated differently than objects even though they are also objects.) Calling this method on two different types will result in an error. (See below.)
 #### Primitives
