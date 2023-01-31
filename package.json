@@ -23,8 +23,8 @@
   "keywords": [
     "Value History"
   ],
-  "author": "JPR",
-  "license": "ISC",
+  "author": "John Russo",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/johnpaulrusso/value-history/issues"
   },
