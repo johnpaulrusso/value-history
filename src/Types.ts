@@ -1,4 +1,4 @@
-export const NO_HISTORIC_CHANGES: undefined = undefined;
+export const NO_HISTORIC_CHANGES: any = null;
 
 export class ValueHistoryTypeMismatchError extends Error
 {
