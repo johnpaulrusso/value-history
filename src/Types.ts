@@ -12,11 +12,11 @@ export class ValueHistoryTypeMismatchError extends Error
 export interface ICompressedArrayHistory
 {
     l: number
-    c: Array<{i: number, h: any}>
+    c: {i: number, h: any}[]
 }
 
 export interface ICompressedObjectHistory
 {
-    c: Array<{k: string, h: any}> //If sameKeys is true, this will be populated.
-    o?: Object //If sameKeys is false, this will be populated.
+    c: {k: string, h: any}[] // If sameKeys is true, this will be populated.
+    o?: object // If sameKeys is false, this will be populated.
 }

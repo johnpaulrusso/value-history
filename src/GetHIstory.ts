@@ -28,7 +28,7 @@ export function GetHistory(originalValue: any, finalValue: any) : any
                 throw new ValueHistoryTypeMismatchError("Original value is a Date and final value is not.");
             }
         }
-        else //originalValue is an Object
+        else // originalValue is an Object
         {
             if(finalValue !== Object(finalValue))
             {
@@ -46,7 +46,7 @@ export function GetHistory(originalValue: any, finalValue: any) : any
     }
     else
     {
-        //PRIMITIVE
+        // PRIMITIVE
         if(finalValue === Object(finalValue))
         {
             if(Array.isArray(finalValue))
@@ -72,51 +72,51 @@ function getHistoryPrimitive(originalValue: any, finalValue: any) : any
     return originalValue === finalValue ? NO_HISTORIC_CHANGES : originalValue;
 }
 
-function getHistoryArray(originalArray: Array<any>, finalArray: Array<any>) : ICompressedArrayHistory | undefined
+function getHistoryArray(originalArray: any[], finalArray: any[]) : ICompressedArrayHistory | undefined
 {
     let result: any = NO_HISTORIC_CHANGES;
-    let OL = originalArray.length;
-    let FL = finalArray.length;
+    const OL = originalArray.length;
+    const FL = finalArray.length;
 
-    let historyArray: Array<any> = []
-    let compressedArrayHistory: ICompressedArrayHistory = {
+    const historyArray: any[] = []
+    const compressedArrayHistory: ICompressedArrayHistory = {
         l: OL,
         c: []
     }
 
-    if(OL < FL) //Gained one or more values
+    if(OL < FL) // Gained one or more values
     {
         finalArray.forEach((finalValue, index) => {
             if(index < OL)
             {
-                let history = GetHistory(originalArray[index], finalValue);
+                const history = GetHistory(originalArray[index], finalValue);
                 historyArray.push(history);
             }
         })
     }
-    else if(OL > FL) //Lost one or more values
+    else if(OL > FL) // Lost one or more values
     {
         originalArray.forEach((originalValue, index) => {
             if(index < FL)
             {
-                let history = GetHistory(originalValue, finalArray[index]);
+                const history = GetHistory(originalValue, finalArray[index]);
                 historyArray.push(history);
             }
             else
             {
-                historyArray.push(convertValueToHistoryRecord(originalValue)); //Need to convert this to a "history" record.
+                historyArray.push(convertValueToHistoryRecord(originalValue)); // Need to convert this to a "history" record.
             }
         })
     }
-    else //Same length
+    else // Same length
     {
         originalArray.forEach((originalValue, index) => {
-            let history = GetHistory(originalValue, finalArray[index]);
+            const history = GetHistory(originalValue, finalArray[index]);
             historyArray.push(history);
         })
     }
 
-    //Compress history array.
+    // Compress history array.
     historyArray.forEach((history, index) => {
         if(history !== NO_HISTORIC_CHANGES)
         {
@@ -139,17 +139,17 @@ function getHistoryArray(originalArray: Array<any>, finalArray: Array<any>) : IC
  * @param finalObject 
  * @returns 
  */
-function getHistoryObject(originalObject: Object, finalObject: Object) : ICompressedObjectHistory | undefined
+function getHistoryObject(originalObject: object, finalObject: object) : ICompressedObjectHistory | undefined
 {
     let result: ICompressedObjectHistory | undefined = NO_HISTORIC_CHANGES;
-    let compressedObjectHistory: ICompressedObjectHistory = {
+    const compressedObjectHistory: ICompressedObjectHistory = {
         c: []
     }
 
-    let originalKeys = Object.entries(originalObject).map(([key, _]) => key);
-    let finalKeys = Object.entries(finalObject).map(([key, _]) => key);
+    const originalKeys = Object.entries(originalObject).map(([key, _]) => key);
+    const finalKeys = Object.entries(finalObject).map(([key, _]) => key);
 
-    let valuesHaveSameLength: boolean = originalKeys.length === finalKeys.length;
+    const valuesHaveSameLength: boolean = originalKeys.length === finalKeys.length;
     let valuesHaveSameKeys: boolean = false;
     if(valuesHaveSameLength)
     {
@@ -159,10 +159,10 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
     if(valuesHaveSameLength && valuesHaveSameKeys)
     {
         originalKeys.forEach((key) => {
-            //Both objects have the key, so get the history!
-            let originalValue = originalObject[key as keyof typeof originalObject];
-            let finalValue = finalObject[key as keyof typeof finalObject];
-            let historyValue = GetHistory(originalValue, finalValue);
+            // Both objects have the key, so get the history!
+            const originalValue = originalObject[key as keyof typeof originalObject];
+            const finalValue = finalObject[key as keyof typeof finalObject];
+            const historyValue = GetHistory(originalValue, finalValue);
             if(historyValue !== NO_HISTORIC_CHANGES)
             {
                 compressedObjectHistory.c!.push({k: key, h: historyValue})
@@ -171,7 +171,7 @@ function getHistoryObject(originalObject: Object, finalObject: Object) : ICompre
     }
     else
     {
-        compressedObjectHistory.o = originalObject; //And everything in it.
+        compressedObjectHistory.o = originalObject; // And everything in it.
     }
 
     if(compressedObjectHistory.c.length !== 0 || compressedObjectHistory.o)

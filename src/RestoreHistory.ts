@@ -9,9 +9,9 @@ import {ValueHistoryTypeMismatchError, NO_HISTORIC_CHANGES, type ICompressedArra
  */
 export function RestoreHistory(value: any, history: any) : any
 {
-    //By default, the result is a clone of the value (history === NO_HSTORIC_CHANGES).
-    //Cloning is necessary so that the method doesn't mutate the given value.
-    let valueClone = structuredClone(value);
+    // By default, the result is a clone of the value (history === NO_HSTORIC_CHANGES).
+    // Cloning is necessary so that the method doesn't mutate the given value.
+    const valueClone = structuredClone(value);
     return RestoreHistoryInternal(valueClone, history);
 }
 
@@ -59,7 +59,7 @@ function RestoreHistoryInternal(value: any, history: any) : any
         }   
         else
         {
-            //primitive
+            // primitive
             if(history === Object(history))
             {
                 throw new ValueHistoryTypeMismatchError("Value is a primitive and history is not.");
@@ -74,7 +74,7 @@ function RestoreHistoryInternal(value: any, history: any) : any
     return result;
 }
 
-function RestoreArrayHistory(array: Array<any>, history: ICompressedArrayHistory) : Array<any>
+function RestoreArrayHistory(array: any[], history: ICompressedArrayHistory) : any[]
 {
     let result = array;
 
@@ -109,9 +109,10 @@ function RestoreArrayHistory(array: Array<any>, history: ICompressedArrayHistory
     return result;
 }
 
-function RestoreObjectHistory(obj: Object, history: ICompressedObjectHistory) : Object
+function RestoreObjectHistory(obj: object, history: ICompressedObjectHistory) : object
 {
-    let result: Object = {};
+    type ObjectWithUnknownKeys = {[key: string]: any;};
+    let result: ObjectWithUnknownKeys;
     
     if(history.o)
     {
@@ -121,7 +122,7 @@ function RestoreObjectHistory(obj: Object, history: ICompressedObjectHistory) : 
     {
         result = obj;
         history.c!.forEach(c => {
-            result[c.k as keyof typeof result] = RestoreHistory(result[c.k as keyof typeof result], c.h);
+            result[c.k] = RestoreHistory(result[c.k], c.h);
         });
     }
 
