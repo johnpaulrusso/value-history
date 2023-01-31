@@ -1,10 +1,11 @@
 # Value History
-A simple module to calculate, accumulate, and restore(TBD) the differences between two values.
+A simple module to calculate, accumulate, and restore the differences between two values. Supported values include primitives, dates, arrays, and JSON.
 ## Usage
 
 ### GetHistory
 Values passed to GetHistory must be of the same type. This works for primitives, arrays, and objects. (Arrays are treated differently than objects even though they are also objects.) Calling this method on two different types will result in an error. (See below.)
 #### Primitives
+For primitives (and Dates) the history is simple the original value.
 ```javascript
 let v0 = 1;
 let vf = 2;
@@ -12,13 +13,15 @@ let history = GetHistory(v0, vf); // history = 1;
 ```
 
 #### Arrays
+The resulting history specifies that the array length used to be 3 and the value at index 1 used to be 2.
 ```javascript
 let v0 = [1,2,3];
 let vf = [1,0,3];
-let history = GetHistory(v0, vf); // history = {l:2, c: [{i: 1, h: 2}]};
+let history = GetHistory(v0, vf); // history = {l:3, c: [{i: 1, h: 2}]};
 ```
 
 #### Objects
+The resulting history specifies that the value at key 'v2' used to be 2.
 ```javascript
 let v0 = {v1: 1, v2: 2, v3: 3};
 let vf = {v1: 1, v2: 0, v3: 3};
@@ -39,6 +42,7 @@ let vf = [1,2,3];
 let history = GetHistory(v0, vf); // returns NO_HISTORIC_CHANGES (undefined)
 ```
 ### AccumulateHistory
+History records can be accumulated as follows:
 #### Primitives
 ```javascript
 let h0 = 1;
