@@ -1,9 +1,41 @@
 import * as valuehistory from '../ValueHistory'
 
 describe('Get, Accumulate, and Restore History', () => {
-    it('should get, accumulate, and restore a primitive', () => {
+    it('should get, accumulate, and restore a primitive part 1', () => {
         let v0 = 0;
         let v1 = 1
+        let vf = 2;
+        let h01 = valuehistory.GetHistory(v0, v1);
+        let h1f = valuehistory.GetHistory(v1, vf);
+        let h0f = valuehistory.GetHistory(v0, vf);
+        let h0f_acc = valuehistory.AccumulateHistory(h01, h1f);
+
+        let v0_restored = valuehistory.RestoreHistory(vf, h0f);
+        let v0_restored_acc = valuehistory.RestoreHistory(vf, h0f_acc);
+
+        expect(v0_restored).toBe(v0_restored_acc);
+        expect(h0f).toBe(h0f_acc);
+    });
+
+    it('should get, accumulate, and restore a primitive part 2', () => {
+        let v0 = 0;
+        let v1 = 0;
+        let vf = 2;
+        let h01 = valuehistory.GetHistory(v0, v1);
+        let h1f = valuehistory.GetHistory(v1, vf);
+        let h0f = valuehistory.GetHistory(v0, vf);
+        let h0f_acc = valuehistory.AccumulateHistory(h01, h1f);
+
+        let v0_restored = valuehistory.RestoreHistory(vf, h0f);
+        let v0_restored_acc = valuehistory.RestoreHistory(vf, h0f_acc);
+
+        expect(v0_restored).toBe(v0_restored_acc);
+        expect(h0f).toBe(h0f_acc);
+    });
+
+    it('should get, accumulate, and restore a primitive part 3', () => {
+        let v0 = 0;
+        let v1 = 2;
         let vf = 2;
         let h01 = valuehistory.GetHistory(v0, v1);
         let h1f = valuehistory.GetHistory(v1, vf);
@@ -76,6 +108,30 @@ describe('Get, Accumulate, and Restore History', () => {
 
         let v0_restored = valuehistory.RestoreHistory(vf, h0f);
         let v0_restored_acc = valuehistory.RestoreHistory(vf, h0f_acc);
+
+        expect(v0_restored).toStrictEqual(v0_restored_acc);
+        expect(h0f).toStrictEqual(h0f_acc);
+    });
+
+    it('should get, accumulate, and restore many separate histories.', () => {
+        let v0 = {v1: 1, v2: 2, v3: 3};
+        let v1 = {v1: 1, v2: 0, v3: 3};
+        let v2 = {v1: 1, v2: 0, v3: 3};
+        let v3 = {v1: 1, v2: 0, v3: 5};
+        let v4 = {v1: 1, v2: 0, v3: 5};
+        let h01 = valuehistory.GetHistory(v0, v1);
+        let h12 = valuehistory.GetHistory(v1, v2);
+        let h23 = valuehistory.GetHistory(v2, v3);
+        let h34 = valuehistory.GetHistory(v3, v4);
+
+        let h0f_acc = valuehistory.AccumulateHistory(h01, h12);
+        h0f_acc = valuehistory.AccumulateHistory(h0f_acc, h23);
+        h0f_acc = valuehistory.AccumulateHistory(h0f_acc, h34);
+
+        let h0f = valuehistory.GetHistory(v0, v4);
+        
+        let v0_restored = valuehistory.RestoreHistory(v4, h0f);
+        let v0_restored_acc = valuehistory.RestoreHistory(v4, h0f_acc);
 
         expect(v0_restored).toStrictEqual(v0_restored_acc);
         expect(h0f).toStrictEqual(h0f_acc);

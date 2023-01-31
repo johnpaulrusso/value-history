@@ -4,63 +4,64 @@ export function AccumulateHistory(olderHistory: any, newerHistory: any) : any
 {
     let result: any = NO_HISTORIC_CHANGES;
 
-    if(olderHistory !== NO_HISTORIC_CHANGES)
+    if(olderHistory === NO_HISTORIC_CHANGES)
     {
-        if(newerHistory === NO_HISTORIC_CHANGES)
+        result = newerHistory;
+    }
+    else if(newerHistory === NO_HISTORIC_CHANGES)
+    {
+        result = olderHistory;
+    }
+    else if(olderHistory === Object(olderHistory))
+    {
+        if(Object(olderHistory).hasOwnProperty("l")) // olderHistory is compressed array history.
         {
-            result = olderHistory;
-        }
-        else if(olderHistory === Object(olderHistory))
-        {
-            if(Object(olderHistory).hasOwnProperty("l")) // olderHistory is compressed array history.
+            if(Object(newerHistory).hasOwnProperty("l"))
             {
-                if(Object(newerHistory).hasOwnProperty("l"))
-                {
-                    result = AccumulateArrayHistory(olderHistory, newerHistory);
-                }
-                else // newer history is NOT compressed array history.
-                {
-                    throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an array history and newer is not.");
-                }
+                result = AccumulateArrayHistory(olderHistory, newerHistory);
             }
-            else if(Object(olderHistory).hasOwnProperty("c")) // olderHistory is compressed object history.
+            else // newer history is NOT compressed array history.
             {
-                if(Object(newerHistory).hasOwnProperty("c") && !Object(newerHistory).hasOwnProperty("l"))
-                {
-                    result = AccumulateObjectHistory(olderHistory, newerHistory);
-                }
-                else // newer history is NOT compressed array history.
-                {
-                    throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an object history and newer is not.");
-                }
-            }
-            else if(Object.prototype.toString.call(olderHistory) === '[object Date]')
-            {
-                if(Object.prototype.toString.call(newerHistory) === '[object Date]')
-                {
-                    result = olderHistory; 
-                }
-                else
-                {
-                    throw new ValueHistoryTypeMismatchError("Incompatible Histories - older history is a Date and newer is not.");
-                }
-                
-            }
-            else
-            {
-                throw new ValueHistoryTypeMismatchError("Incompatible Histories - Unrecognized history types.");
+                throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an array history and newer is not.");
             }
         }
-        else // olderHistory is Primitive
+        else if(Object(olderHistory).hasOwnProperty("c")) // olderHistory is compressed object history.
         {
-            if(newerHistory !== Object(newerHistory)) // newerHistory is also Primitive
+            if(Object(newerHistory).hasOwnProperty("c") && !Object(newerHistory).hasOwnProperty("l"))
+            {
+                result = AccumulateObjectHistory(olderHistory, newerHistory);
+            }
+            else // newer history is NOT compressed array history.
+            {
+                throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is an object history and newer is not.");
+            }
+        }
+        else if(Object.prototype.toString.call(olderHistory) === '[object Date]')
+        {
+            if(Object.prototype.toString.call(newerHistory) === '[object Date]')
             {
                 result = olderHistory; 
             }
             else
             {
-                throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is a primitive history and newer is an array or object history.");
+                throw new ValueHistoryTypeMismatchError("Incompatible Histories - older history is a Date and newer is not.");
             }
+            
+        }
+        else
+        {
+            throw new ValueHistoryTypeMismatchError("Incompatible Histories - Unrecognized history types.");
+        }
+    }
+    else // olderHistory is Primitive
+    {
+        if(newerHistory !== Object(newerHistory)) // newerHistory is also Primitive
+        {
+            result = olderHistory; 
+        }
+        else
+        {
+            throw new ValueHistoryTypeMismatchError("Incompatible Histories - older is a primitive history and newer is an array or object history.");
         }
     }
 

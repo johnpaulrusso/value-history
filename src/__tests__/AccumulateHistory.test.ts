@@ -5,7 +5,7 @@ describe('Accumulate History (w/ Primitives)', () => {
       expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, valuehistory.NO_HISTORIC_CHANGES)).toBe(valuehistory.NO_HISTORIC_CHANGES)
     });
     it('should return NO_HISTORIC_CHANGES if the older history item is NO_HISTORIC_CHANGES', () => {
-      expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, 2)).toBe(valuehistory.NO_HISTORIC_CHANGES)
+      expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, 2)).toBe(2)
     });
     it('should return the older history item if the newer history item is NO_HISTORIC_CHANGES', () => {
       expect(valuehistory.AccumulateHistory(1, valuehistory.NO_HISTORIC_CHANGES)).toBe(1)
@@ -23,7 +23,7 @@ describe('Accumulate History (w/ Primitives)', () => {
      
   describe('Accumulate History (w/ Arrays of Primitives)', () => {
     it('should return NO_HISTORIC_CHANGES if the older history item is NO_HISTORIC_CHANGES', () => {
-      expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, {l:3, c: [{i: 1, h: 2}]})).toBe(valuehistory.NO_HISTORIC_CHANGES)
+      expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, {l:3, c: [{i: 1, h: 2}]})).toStrictEqual({l:3, c: [{i: 1, h: 2}]})
     });
     it('should return the older history item if the newer history item is NO_HISTORIC_CHANGES', () => {
         expect(valuehistory.AccumulateHistory({l:3, c: [{i: 1, h: 1}]}, valuehistory.NO_HISTORIC_CHANGES)).toStrictEqual({l:3, c: [{i: 1, h: 1}]})
@@ -66,7 +66,7 @@ describe('Accumulate History (w/ Primitives)', () => {
 
   describe('Accumulate History (w/ Objects of Primitives)', () => {
     it('should return NO_HISTORIC_CHANGES if the older history item is NO_HISTORIC_CHANGES', () => {
-      expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, {c: [{k: "1", h: 1}]})).toBe(valuehistory.NO_HISTORIC_CHANGES)
+      expect(valuehistory.AccumulateHistory(valuehistory.NO_HISTORIC_CHANGES, {c: [{k: "1", h: 1}]})).toStrictEqual({c: [{k: "1", h: 1}]})
     });
     it('should return the older history item if the newer history item is NO_HISTORIC_CHANGES', () => {
         expect(valuehistory.AccumulateHistory({c: [{k: "1", h: 1}]}, valuehistory.NO_HISTORIC_CHANGES)).toStrictEqual({c: [{k: "1", h: 1}]})
