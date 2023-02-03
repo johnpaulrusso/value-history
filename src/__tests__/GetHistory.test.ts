@@ -78,10 +78,24 @@ describe('Get History (w/ Array of Arrays)', () => {
 
 
 describe('Get History (w/ Arrays of Objects)', () => {
-  it('should get history of arrays of objects', () => {
+  it('should get history of arrays of objects with different keys', () => {
     let v0 = [{v1: 1, v2: 2, v3: 3, v4: 4}, {v11: 11, v12: 12}];
     let v1 = [{v1: 1, v2: 0, v3: 3}];
     let expected = {l: 2, c: [{i: 0, h: {c: [], o: {v1: 1, v2: 2, v3: 3, v4: 4}}}, {i: 1, h: {c: [], o: {v11: 11, v12: 12}}}]};
+    let actual = valuehistory.GetHistory(v0, v1);
+    expect(actual).toStrictEqual(expected);
+  });
+  it('should get history of arrays of objects from a shorter array to longer array.', () => {
+    let v0 = [{v1: 1, v2: 2, v3: 3}];
+    let v1 = [{v1: 1, v2: 2, v3: 3}, {v11: 11, v12: 12}];
+    let expected = {l: 1, c: []};
+    let actual = valuehistory.GetHistory(v0, v1);
+    expect(actual).toStrictEqual(expected);
+  });
+  it('should get history of arrays of objects from a longer array to shorter array.', () => {
+    let v0 = [{v1: 1, v2: 2, v3: 3}, {v11: 11, v12: 12}];
+    let v1 = [{v1: 1, v2: 2, v3: 3}];
+    let expected = {l: 2, c: [{i: 1, h: {c: [], o: {v11: 11, v12: 12}}}]};
     let actual = valuehistory.GetHistory(v0, v1);
     expect(actual).toStrictEqual(expected);
   });

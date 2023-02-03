@@ -112,24 +112,6 @@ describe('Restore History (w/ Objects)', () => {
     });
 });
 
-describe('Restore History (w/ Arrays of Objects)', () => {
-    it('should restore an array of objects', () => {
-        expect(valuehistory.RestoreHistory([{v1: 1}], {l:1, c: [{i: 0, h: {sameKeys: true, c: [{k: "v1", h: 2}]}}]})).toEqual([{v1: 2}]);
-    });
-    it('should restore an array of objects from an empty array', () => {
-        expect(valuehistory.RestoreHistory([], {l:1, c: [{i: 0, h: {c: [], o: {v1: 2}}}]})).toEqual([{v1: 2}]);
-    });
-    it('should restore an array of objects to an empty array', () => {
-        expect(valuehistory.RestoreHistory([{v1: 2}], {l:0, c: []})).toEqual([]);
-    });
-});
-
-describe('Restore History (w/ Arrays of Objects)', () => {
-    it('should restore an array of objects with different keys', () => {
-        expect(valuehistory.RestoreHistory([{v1: 1}], {l:1, c: [{i: 0, h: {c: [], o: {v2: 2}}}]})).toEqual([{v2: 2}]);
-    });
-});
-
 describe('Restore History (w/ Arrays of Arrays)', () => {
     it('should restore deeply nested arrays', () => {
         let v0 = [[[1]],[[2]]];
@@ -152,24 +134,33 @@ describe('Restore History (w/ Arrays of Arrays)', () => {
 });
 
 describe('Restore History (w/ Arrays of Objects)', () => {
+    it('should restore an array of objects', () => {
+        expect(valuehistory.RestoreHistory([{v1: 1}], {l:1, c: [{i: 0, h: {sameKeys: true, c: [{k: "v1", h: 2}]}}]})).toEqual([{v1: 2}]);
+    });
+    it('should restore an array of objects from an empty array', () => {
+        expect(valuehistory.RestoreHistory([], {l:1, c: [{i: 0, h: {c: [], o: {v1: 2}}}]})).toEqual([{v1: 2}]);
+    });
+    it('should restore an array of objects to an empty array', () => {
+        expect(valuehistory.RestoreHistory([{v1: 2}], {l:0, c: []})).toEqual([]);
+    });
+    it('should restore an array of objects with different keys', () => {
+        expect(valuehistory.RestoreHistory([{v1: 1}], {l:1, c: [{i: 0, h: {c: [], o: {v2: 2}}}]})).toEqual([{v2: 2}]);
+    });
+
     it('should restore deeply nested arrays of objects.', () => {
         let v0 = [[[{v1: 1}]],[[{v2: 2}]]];
         let v1 = [[[{v1: 1}]],[[{v2: 3}]]];
         let h = valuehistory.GetHistory(v0, v1);
         expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
     });
-});
 
-describe('Restore History (w/ Arrays of Objects)', () => {
     it('should restore an array of objects with different keys', () => {
         let v0 = {v3: {v4: 2}}
         let v1 = {v2: {v1: 2}}
         let h = valuehistory.GetHistory(v0, v1);
         expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
     });
-});
 
-describe('Restore History (w/ Arrays of Objects)', () => {
     it('should restore an array of objects with different keys', () => {
         let v0 = {v3: {v4: [1,2]}}
         let v1 = {v2: {v1: [1]}}
@@ -177,6 +168,7 @@ describe('Restore History (w/ Arrays of Objects)', () => {
         expect(valuehistory.RestoreHistory(v1, h)).toEqual(v0);
     });
 });
+
 
 describe('Restore History (w/ Dates)', () => {
     

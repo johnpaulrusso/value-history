@@ -11,7 +11,11 @@ export function RestoreHistory(value: any, history: any) : any
 {
     // By default, the result is a clone of the value (history === NO_HSTORIC_CHANGES).
     // Cloning is necessary so that the method doesn't mutate the given value.
-    const valueClone = structuredClone(value);
+    
+    //TODO: check NODE version and choose which method to use.
+    const valueClone = structuredClone(value); //Not supported in NODE 16.
+    //const valueClone = JSON.parse(JSON.stringify(value));
+
     return RestoreHistoryInternal(valueClone, history);
 }
 
