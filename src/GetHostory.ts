@@ -1,5 +1,6 @@
 import {ValueHistoryTypeMismatchError, NO_HISTORIC_CHANGES, type ICompressedArrayHistory, type ICompressedObjectHistory} from "./Types";
 
+
 export function GetHistory(originalValue: any, finalValue: any) : any 
 {
     let result: any = NO_HISTORIC_CHANGES;
